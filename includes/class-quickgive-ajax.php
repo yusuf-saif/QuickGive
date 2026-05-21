@@ -11,7 +11,7 @@
  *   - Passes `amount_type` to QuickGive_Logger::log().
  *   - Calls QuickGive_Email::send() after verified success.
  *
- * @package QuickGive_For_Paystack
+ * @package QuickGive
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -65,7 +65,7 @@ class QuickGive_Ajax {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
 		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'quickgive-for-paystack' ) ),
+				array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'quickgive' ) ),
 				403
 			);
 		}
@@ -85,7 +85,7 @@ class QuickGive_Ajax {
 
 		if ( empty( $reference ) || empty( $email ) || $amount <= 0 ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Missing required fields.', 'quickgive-for-paystack' ) ),
+				array( 'message' => __( 'Missing required fields.', 'quickgive' ) ),
 				400
 			);
 		}
@@ -99,7 +99,7 @@ class QuickGive_Ajax {
 
 		if ( empty( $secret_key ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Payment gateway not configured. Please contact the site administrator.', 'quickgive-for-paystack' ) ),
+				array( 'message' => __( 'Payment gateway not configured. Please contact the site administrator.', 'quickgive' ) ),
 				500
 			);
 		}
@@ -119,7 +119,7 @@ class QuickGive_Ajax {
 		if ( is_wp_error( $api_response ) ) {
 			QuickGive_Logger::log( $reference, $email, $amount / 100, $currency, 'failed', $amount_type );
 			wp_send_json_error(
-				array( 'message' => __( 'Could not connect to the payment gateway. Please try again later.', 'quickgive-for-paystack' ) ),
+				array( 'message' => __( 'Could not connect to the payment gateway. Please try again later.', 'quickgive' ) ),
 				502
 			);
 		}
@@ -134,7 +134,7 @@ class QuickGive_Ajax {
 			empty( $data['data']['status'] ) ||
 			'success' !== $data['data']['status']
 		) {
-			$error_message = $data['message'] ?? __( 'Payment verification failed.', 'quickgive-for-paystack' );
+			$error_message = $data['message'] ?? __( 'Payment verification failed.', 'quickgive' );
 			QuickGive_Logger::log( $reference, $email, $amount / 100, $currency, 'failed', $amount_type );
 			wp_send_json_error( array( 'message' => esc_html( $error_message ) ), 402 );
 		}
@@ -147,7 +147,7 @@ class QuickGive_Ajax {
 		if ( $verified_amount !== $amount ) {
 			QuickGive_Logger::log( $reference, $email, $amount / 100, $currency, 'failed', $amount_type );
 			wp_send_json_error(
-				array( 'message' => __( 'Payment amount mismatch. Transaction rejected.', 'quickgive-for-paystack' ) ),
+				array( 'message' => __( 'Payment amount mismatch. Transaction rejected.', 'quickgive' ) ),
 				402
 			);
 		}
@@ -160,7 +160,7 @@ class QuickGive_Ajax {
 
 		// 9. Return the thank-you message to the frontend.
 		$thank_you = wp_kses_post(
-			$opts['thankyou_message'] ?? __( 'Thank you for your generous donation!', 'quickgive-for-paystack' )
+			$opts['thankyou_message'] ?? __( 'Thank you for your generous donation!', 'quickgive' )
 		);
 
 		wp_send_json_success(

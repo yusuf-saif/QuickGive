@@ -12,7 +12,7 @@
  *   {reference} — Paystack transaction reference
  *   {site_name} — WordPress site name
  *
- * @package QuickGive_For_Paystack
+ * @package QuickGive
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

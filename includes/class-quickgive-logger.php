@@ -7,7 +7,7 @@
  *   - Added `maybe_upgrade_table()` for non-destructive ALTER on existing installs.
  *   - Added `get_summary()` returning overview metrics for the dashboard.
  *
- * @package QuickGive_For_Paystack
+ * @package QuickGive
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -186,7 +186,7 @@ class QuickGive_Logger {
 			);
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 	}
 

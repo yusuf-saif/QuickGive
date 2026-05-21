@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/) and the
 
 ---
 
-## [1.1.0] — 2026-04-13
+## [1.0.0] — 2026-04-13
 
 ### Added
 
@@ -41,7 +41,7 @@ This project adheres to [Semantic Versioning](https://semver.org/) and the
 
 ---
 
-## [1.0.0] — 2026-04-13
+## [0.0.0] — 2026-04-13
 
 ### Added
 

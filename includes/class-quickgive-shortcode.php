@@ -5,7 +5,7 @@
  * Registers [paystack_donation_popup] and enqueues frontend assets only when
  * the shortcode is actually used on a page.
  *
- * @package QuickGive_For_Paystack
+ * @package QuickGive
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,7 +50,7 @@ class QuickGive_Shortcode {
 			// Show a notice to admins; show nothing to regular visitors.
 			if ( current_user_can( 'manage_options' ) ) {
 				return '<p class="quickgive-notice">'
-					. esc_html__( 'QuickGive: Please configure your Paystack public key in the plugin settings.', 'quickgive-for-paystack' )
+					. esc_html__( 'QuickGive: Please configure your Paystack public key in the plugin settings.', 'quickgive' )
 					. '</p>';
 			}
 			return '';
@@ -61,7 +61,7 @@ class QuickGive_Shortcode {
 
 		$button_label = ! empty( $opts['button_label'] )
 			? $opts['button_label']
-			: __( 'Donate Now', 'quickgive-for-paystack' );
+			: __( 'Donate Now', 'quickgive' );
 
 		// Build the popup modal markup.
 		ob_start();
@@ -130,15 +130,15 @@ class QuickGive_Shortcode {
 				'nonce'       => wp_create_nonce( 'quickgive_nonce' ),
 				'action'      => 'quickgive_verify',
 				'i18n'        => array(
-					'donate'          => __( 'Donate', 'quickgive-for-paystack' ),
-					'selectAmount'    => __( 'Please select or enter a donation amount.', 'quickgive-for-paystack' ),
-					'validEmail'      => __( 'Please enter a valid email address.', 'quickgive-for-paystack' ),
-					'minAmountMsg'    => __( 'Minimum donation amount is', 'quickgive-for-paystack' ),
-					'maxAmountMsg'    => __( 'Maximum donation amount is', 'quickgive-for-paystack' ),
-					'processing'      => __( 'Processing…', 'quickgive-for-paystack' ),
-					'verifying'       => __( 'Verifying payment…', 'quickgive-for-paystack' ),
-					'paymentFailed'   => __( 'Payment was not completed. Please try again.', 'quickgive-for-paystack' ),
-					'networkError'    => __( 'A network error occurred. Please check your connection and try again.', 'quickgive-for-paystack' ),
+					'donate'          => __( 'Donate', 'quickgive' ),
+					'selectAmount'    => __( 'Please select or enter a donation amount.', 'quickgive' ),
+					'validEmail'      => __( 'Please enter a valid email address.', 'quickgive' ),
+					'minAmountMsg'    => __( 'Minimum donation amount is', 'quickgive' ),
+					'maxAmountMsg'    => __( 'Maximum donation amount is', 'quickgive' ),
+					'processing'      => __( 'Processing…', 'quickgive' ),
+					'verifying'       => __( 'Verifying payment…', 'quickgive' ),
+					'paymentFailed'   => __( 'Payment was not completed. Please try again.', 'quickgive' ),
+					'networkError'    => __( 'A network error occurred. Please check your connection and try again.', 'quickgive' ),
 				),
 			)
 		);

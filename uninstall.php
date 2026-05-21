@@ -5,7 +5,7 @@
  * Fires when the plugin is deleted from the WordPress dashboard.
  * Removes all plugin data: settings and the custom donations table.
  *
- * @package QuickGive_For_Paystack
+ * @package QuickGive
  */
 
 // Bail if not called by WordPress uninstall process.
