@@ -1,11 +1,8 @@
 /**
  * QuickGive for Paystack — Frontend JavaScript
  *
- * v1.1 changes:
- *   - Determines `amount_type` ('preset' | 'custom') based on donor selection.
- *   - Sends `amount_type` in the AJAX verification POST.
- *   - Two-way deselection: typing in custom input clears preset selection,
- *     and clicking a preset clears the custom input value.
+ * Determines `amount_type` based on donor selection, keeps preset and custom
+ * amount inputs in sync, and posts the donation type for server verification.
  *
  * Manages:
  *   1. Modal open / close / accessibility (focus trap, Escape key)
@@ -181,7 +178,7 @@
 			btn.classList.add( 'quickgive-preset-btn--active' );
 			btn.setAttribute( 'aria-pressed', 'true' );
 
-			// v1.1 — clear custom amount when a preset is chosen.
+			// Clear any custom amount when a preset is chosen.
 			const customInput = document.getElementById( uid + '-custom' );
 			if ( customInput ) {
 				customInput.value = '';
@@ -191,7 +188,7 @@
 	}
 
 	// -------------------------------------------------------------------------
-	// Custom amount → preset deselection (v1.1)
+	// Custom amount -> preset deselection.
 	// -------------------------------------------------------------------------
 
 	/**
@@ -342,7 +339,7 @@
 	 * @param {string}      reference
 	 * @param {string}      email
 	 * @param {number}      amountInKobo
-	 * @param {string}      amountType   'preset' or 'custom'  (v1.1).
+	 * @param {string}      amountType   'preset' or 'custom'.
 	 * @param {HTMLElement} submitBtn
 	 * @param {HTMLElement} alertEl
 	 */
@@ -354,7 +351,7 @@
 		formData.append( 'email',       email );
 		formData.append( 'amount',      amountInKobo );
 		formData.append( 'currency',    cfg.currency );
-		formData.append( 'amount_type', amountType );  // v1.1
+		formData.append( 'amount_type', amountType );
 
 		fetch( cfg.ajaxUrl, {
 			method:      'POST',
@@ -417,7 +414,7 @@
 				buildPresets( presetsContainer, uid );
 			}
 
-			// v1.1 — wire custom input deselection.
+			// Wire custom input deselection.
 			wireCustomInput( uid );
 
 			trigger.addEventListener( 'click', function () {
@@ -451,7 +448,7 @@
 
 				clearAlert( alertEl );
 
-				// v1.1 — resolve returns { amount, amountType } or null.
+				// Resolve returns { amount, amountType } or null.
 				const resolved = resolveAmount( uid, alertEl );
 				if ( resolved === null ) { return; }
 

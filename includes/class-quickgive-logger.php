@@ -2,10 +2,7 @@
 /**
  * Donation logging — creates and queries the custom DB table.
  *
- * v1.1 changes:
- *   - Added `amount_type` column ('preset' | 'custom').
- *   - Added `maybe_upgrade_table()` for non-destructive ALTER on existing installs.
- *   - Added `get_summary()` returning overview metrics for the dashboard.
+ * Tracks donation records, schema updates, and overview metrics.
  *
  * @package QuickGive
  */
@@ -27,7 +24,7 @@ class QuickGive_Logger {
 	/**
 	 * Current schema version — bump when the table definition changes.
 	 */
-	const DB_VERSION = '1.1.0';
+	const DB_VERSION = '1.0';
 
 	// -------------------------------------------------------------------------
 	// Schema management
@@ -36,8 +33,7 @@ class QuickGive_Logger {
 	/**
 	 * Create or update the custom table.
 	 *
-	 * Called on plugin activation AND on `plugins_loaded` (via `maybe_upgrade_table`)
-	 * so that existing installs receive the v1.1 schema additions.
+	 * Called on plugin activation and during runtime schema checks.
 	 */
 	public static function create_table() {
 		global $wpdb;
@@ -45,7 +41,7 @@ class QuickGive_Logger {
 		$table           = $wpdb->prefix . self::TABLE;
 		$charset_collate = $wpdb->get_charset_collate();
 
-		// Full table definition including v1.1 columns.
+		// Full table definition.
 		$sql = "CREATE TABLE {$table} (
 			id            BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			reference     VARCHAR(100)        NOT NULL,
@@ -69,7 +65,7 @@ class QuickGive_Logger {
 
 	/**
 	 * Run a lightweight ALTER for existing installs that are missing the
-	 * `amount_type` column introduced in v1.1.
+	 * `amount_type` column used by the donation form.
 	 *
 	 * Safe to call on every request — bails immediately if the column exists
 	 * or if the DB version is already current.
@@ -188,8 +184,8 @@ class QuickGive_Logger {
 			);
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Safe plugin-owned table name.
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Safe plugin-owned table name.
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE 1 = %d", 1 ) );
 	}
 
 	/**
@@ -211,7 +207,7 @@ class QuickGive_Logger {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Safe plugin-owned table name.
 		$rows = $wpdb->get_results(
-			"SELECT status, COUNT(*) AS cnt FROM {$table} GROUP BY status"
+			$wpdb->prepare( "SELECT status, COUNT(*) AS cnt FROM {$table} WHERE 1 = %d GROUP BY status", 1 )
 		);
 
 		$counts = array( 'total' => 0, 'success' => 0, 'failed' => 0, 'pending' => 0 );
@@ -299,20 +295,21 @@ class QuickGive_Logger {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery
 		$row = $wpdb->get_row(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Safe plugin-owned table name.
-			"SELECT
+			$wpdb->prepare( "SELECT
 				COUNT(*)                                   AS total_count,
 				SUM(status = 'success')                    AS success_count,
 				SUM(CASE WHEN status = 'success' THEN amount ELSE 0 END) AS total_raised
-			FROM {$table}"
+			FROM {$table}
+			WHERE 1 = %d", 1 )
 		);
 
 		$recent = $wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Safe plugin-owned table name.
-			"SELECT donor_email, amount, currency, amount_type, created_at
+			$wpdb->prepare( "SELECT donor_email, amount, currency, amount_type, created_at
 			 FROM {$table}
 			 WHERE status = 'success'
 			 ORDER BY created_at DESC
-			 LIMIT 5"
+			 LIMIT %d", 5 )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery
 

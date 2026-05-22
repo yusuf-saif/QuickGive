@@ -3,9 +3,9 @@
  * Donation popup modal template.
  *
  * Variables available from class-quickgive-shortcode.php:
- *   @var array  $opts         Plugin settings.
- *   @var string $button_label Donation button label.
- *   @var string $public_key   Paystack public key (safe to include in HTML data attribute).
+ *   @var array  $quickgive_options      Plugin settings.
+ *   @var string $quickgive_button_label Donation button label.
+ *   @var string $quickgive_public_key   Paystack public key (safe to include in HTML data attribute).
  *
  * This file must not be accessed directly.
  *
@@ -21,8 +21,8 @@ static $quickgive_instance_count = 0;
 $quickgive_instance_count++;
 $quickgive_uid = 'qg-' . $quickgive_instance_count;
 
-$quickgive_currency     = $opts['currency'] ?? 'NGN';
-$quickgive_allow_custom = isset( $opts['allow_custom'] ) && '1' === $opts['allow_custom'];
+$quickgive_currency     = $quickgive_options['currency'] ?? 'NGN';
+$quickgive_allow_custom = isset( $quickgive_options['allow_custom'] ) && '1' === $quickgive_options['allow_custom'];
 ?>
 <!-- QuickGive Donation Button -->
 <div class="quickgive-wrap" id="<?php echo esc_attr( $quickgive_uid . '-wrap' ); ?>">
@@ -37,7 +37,7 @@ $quickgive_allow_custom = isset( $opts['allow_custom'] ) && '1' === $opts['allow
 		<svg class="quickgive-btn__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
 			<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A5.5 5.5 0 0 1 12 5.09 5.5 5.5 0 0 1 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
 		</svg>
-		<?php echo esc_html( $button_label ); ?>
+		<?php echo esc_html( $quickgive_button_label ); ?>
 	</button>
 
 	<!-- Modal Overlay -->

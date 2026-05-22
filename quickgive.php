@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       QuickGive
  * Plugin URI:        https://wordpress.org/plugins/quickgive/
- * Description:       Collect one-time donations via a Paystack popup modal. Drop the [paystack_donation_popup] shortcode anywhere.
+ * Description:       Collect one-time donations via a Paystack popup modal. Drop the [quickgive_donation_popup] shortcode anywhere.
  * Version:           1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4

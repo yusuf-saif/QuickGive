@@ -6,10 +6,8 @@
  * success callback, validates the nonce, verifies the transaction server-side,
  * logs the result, and (on verified success) dispatches the donor thank-you email.
  *
- * v1.1 changes:
- *   - Accepts `amount_type` ('preset'|'custom') from POST.
- *   - Passes `amount_type` to QuickGive_Logger::log().
- *   - Calls QuickGive_Email::send() after verified success.
+ * Accepts the donation type, verifies the transaction, logs the result,
+ * and optionally sends the donor email after successful verification.
  *
  * @package QuickGive
  */
@@ -71,21 +69,21 @@ class QuickGive_Ajax {
 		}
 
 		// 2. Sanitise and validate inputs.
-		$reference = isset( $_POST['reference'] )   ? sanitize_text_field( wp_unslash( $_POST['reference'] ) )  : '';
-		$email     = isset( $_POST['email'] )        ? sanitize_email( wp_unslash( $_POST['email'] ) )           : '';
-		$amount    = isset( $_POST['amount'] )       ? absint( $_POST['amount'] )                                : 0;
+		$reference = isset( $_POST['reference'] ) ? sanitize_text_field( wp_unslash( $_POST['reference'] ) ) : '';
+		$email     = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+		$amount    = isset( $_POST['amount'] ) ? absint( wp_unslash( $_POST['amount'] ) ) : 0;
 
 		$allowed_currencies = array( 'NGN', 'GHS', 'ZAR', 'KES', 'USD', 'GBP', 'EUR' );
 		$raw_currency       = strtoupper( sanitize_text_field( wp_unslash( $_POST['currency'] ?? '' ) ) );
 		$currency           = in_array( $raw_currency, $allowed_currencies, true ) ? $raw_currency : '';
 
-		// v1.1 — amount_type: accept only 'preset' or 'custom'; default to 'preset'.
+		// Accept only known donation amount types.
 		$raw_type    = sanitize_text_field( wp_unslash( $_POST['amount_type'] ?? 'preset' ) );
 		$amount_type = in_array( $raw_type, array( 'preset', 'custom' ), true ) ? $raw_type : 'preset';
 
-		if ( empty( $reference ) || empty( $email ) || $amount <= 0 ) {
+		if ( empty( $reference ) || empty( $email ) || ! is_email( $email ) || empty( $currency ) || $amount <= 0 ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Missing required fields.', 'quickgive' ) ),
+				array( 'message' => __( 'Missing or invalid required fields.', 'quickgive' ) ),
 				400
 			);
 		}
@@ -124,11 +122,13 @@ class QuickGive_Ajax {
 			);
 		}
 
-		$body = wp_remote_retrieve_body( $api_response );
-		$data = json_decode( $body, true );
+		$body      = wp_remote_retrieve_body( $api_response );
+		$http_code = (int) wp_remote_retrieve_response_code( $api_response );
+		$data      = json_decode( $body, true );
 
 		// 5. Validate the Paystack response structure and status.
 		if (
+			200 !== $http_code ||
 			empty( $data['status'] ) ||
 			true !== $data['status'] ||
 			empty( $data['data']['status'] ) ||
@@ -141,13 +141,20 @@ class QuickGive_Ajax {
 
 		// 6. Cross-check amount to prevent value manipulation.
 		//    Paystack returns amounts in the smallest currency unit (kobo for NGN).
-		$verified_amount   = absint( $data['data']['amount'] );
-		$verified_currency = strtoupper( sanitize_text_field( $data['data']['currency'] ?? '' ) );
+		$verified_amount    = absint( $data['data']['amount'] );
+		$verified_currency  = strtoupper( sanitize_text_field( $data['data']['currency'] ?? '' ) );
+		$verified_reference = sanitize_text_field( $data['data']['reference'] ?? '' );
+		$verified_email     = sanitize_email( $data['data']['customer']['email'] ?? '' );
 
-		if ( $verified_amount !== $amount ) {
+		if (
+			$verified_amount !== $amount ||
+			$verified_currency !== $currency ||
+			$verified_reference !== $reference ||
+			$verified_email !== $email
+		) {
 			QuickGive_Logger::log( $reference, $email, $amount / 100, $currency, 'failed', $amount_type );
 			wp_send_json_error(
-				array( 'message' => __( 'Payment amount mismatch. Transaction rejected.', 'quickgive' ) ),
+				array( 'message' => __( 'Payment verification details did not match. Transaction rejected.', 'quickgive' ) ),
 				402
 			);
 		}
@@ -155,7 +162,7 @@ class QuickGive_Ajax {
 		// 7. All checks passed — write the verified record.
 		QuickGive_Logger::log( $reference, $email, $verified_amount / 100, $verified_currency, 'success', $amount_type );
 
-		// 8. v1.1 — Send donor thank-you email (only fires if configured and enabled).
+		// 8. Send donor thank-you email (only fires if configured and enabled).
 		QuickGive_Email::send( $email, $verified_amount / 100, $verified_currency, $reference );
 
 		// 9. Return the thank-you message to the frontend.
@@ -166,7 +173,7 @@ class QuickGive_Ajax {
 		wp_send_json_success(
 			array(
 				'message'   => $thank_you,
-				'reference' => $reference,
+				'reference' => sanitize_text_field( $reference ),
 			)
 		);
 	}

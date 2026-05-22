@@ -93,7 +93,7 @@ class QuickGive_Email {
 			? sanitize_text_field( $opts['email_from_name'] )
 			: wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 		$from_email = ! empty( $opts['email_from_email'] ) && is_email( $opts['email_from_email'] )
-			? $opts['email_from_email']
+			? sanitize_email( $opts['email_from_email'] )
 			: get_bloginfo( 'admin_email' );
 
 		$headers = array(
@@ -101,6 +101,6 @@ class QuickGive_Email {
 			'From: ' . $from_name . ' <' . $from_email . '>',
 		);
 
-		return wp_mail( $donor_email, $subject, $body, $headers );
+		return wp_mail( sanitize_email( $donor_email ), $subject, $body, $headers );
 	}
 }

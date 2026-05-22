@@ -2,7 +2,7 @@
 /**
  * Shortcode renderer for QuickGive for Paystack.
  *
- * Registers [paystack_donation_popup] and enqueues frontend assets only when
+ * Registers [quickgive_donation_popup] and enqueues frontend assets only when
  * the shortcode is actually used on a page.
  *
  * @package QuickGive
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers and renders the [paystack_donation_popup] shortcode.
+ * Registers and renders the [quickgive_donation_popup] shortcode.
  */
 class QuickGive_Shortcode {
 
@@ -28,7 +28,7 @@ class QuickGive_Shortcode {
 	 * Constructor — register shortcode.
 	 */
 	public function __construct() {
-		add_shortcode( 'paystack_donation_popup', array( $this, 'render' ) );
+		add_shortcode( 'quickgive_donation_popup', array( $this, 'render' ) );
 	}
 
 	/**
@@ -38,15 +38,15 @@ class QuickGive_Shortcode {
 	 * @return string HTML output.
 	 */
 	public function render( $atts ) {
-		$opts = get_option( 'quickgive_settings', array() );
-		$mode = $opts['mode'] ?? 'test';
+		$quickgive_options = get_option( 'quickgive_settings', array() );
+		$quickgive_mode    = $quickgive_options['mode'] ?? 'test';
 
 		// Determine which public key to use.
-		$public_key = 'live' === $mode
-			? ( $opts['public_key_live'] ?? '' )
-			: ( $opts['public_key_test'] ?? '' );
+		$quickgive_public_key = 'live' === $quickgive_mode
+			? ( $quickgive_options['public_key_live'] ?? '' )
+			: ( $quickgive_options['public_key_test'] ?? '' );
 
-		if ( empty( $public_key ) ) {
+		if ( empty( $quickgive_public_key ) ) {
 			// Show a notice to admins; show nothing to regular visitors.
 			if ( current_user_can( 'manage_options' ) ) {
 				return '<p class="quickgive-notice">'
@@ -57,10 +57,10 @@ class QuickGive_Shortcode {
 		}
 
 		// Enqueue frontend assets the first time the shortcode appears.
-		$this->enqueue_assets( $opts, $public_key );
+		$this->enqueue_assets( $quickgive_options, $quickgive_public_key );
 
-		$button_label = ! empty( $opts['button_label'] )
-			? $opts['button_label']
+		$quickgive_button_label = ! empty( $quickgive_options['button_label'] )
+			? $quickgive_options['button_label']
 			: __( 'Donate Now', 'quickgive' );
 
 		// Build the popup modal markup.
@@ -120,13 +120,13 @@ class QuickGive_Shortcode {
 			'quickgive-frontend',
 			'quickgiveConfig',
 			array(
-				'publicKey'   => $public_key,           // only public key.
-				'currency'    => $opts['currency'] ?? 'NGN',
+				'publicKey'   => sanitize_text_field( $public_key ), // only public key.
+				'currency'    => sanitize_text_field( $opts['currency'] ?? 'NGN' ),
 				'presets'     => $presets,
 				'allowCustom' => ! empty( $opts['allow_custom'] ) && '1' === $opts['allow_custom'],
 				'minAmount'   => absint( $opts['min_amount'] ?? 0 ),
 				'maxAmount'   => absint( $opts['max_amount'] ?? 0 ),
-				'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+				'ajaxUrl'     => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'nonce'       => wp_create_nonce( 'quickgive_nonce' ),
 				'action'      => 'quickgive_verify',
 				'i18n'        => array(

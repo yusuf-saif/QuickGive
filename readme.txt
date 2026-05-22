@@ -8,7 +8,7 @@ Stable tag: 1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-QuickGive lets WordPress sites collect donations securely through Paystack.
+QuickGive lets WordPress sites collect secure one-time donations through Paystack.
 
 == Description ==
 
@@ -50,7 +50,7 @@ No. Site administrators must add their own Paystack keys in the plugin settings.
 
 = What shortcode do I use? =
 
-Add `[paystack_donation_popup]` to any page or post to display the donation button.
+Add `[quickgive_donation_popup]` to any page or post to display the donation button.
 
 = Is the payment verification done server-side? =
 
@@ -67,7 +67,7 @@ Yes. After a donor completes payment in the Paystack popup, the plugin verifies 
 = 1.0 =
 * Initial release.
 * Added Paystack donation payment support.
-* Added donation form shortcode [paystack_donation_popup].
+* Added donation form shortcode [quickgive_donation_popup].
 * Added admin settings for Paystack keys and donation configuration.
 * Added server-side transaction verification.
 * Added donation log in the WordPress admin.

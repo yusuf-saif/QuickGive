@@ -267,7 +267,7 @@ class QuickGive_Admin {
 			'<label><input type="checkbox" name="%1$s[%2$s]" id="%2$s" value="1"%3$s /> %4$s</label>',
 			esc_attr( self::OPTION_NAME ),
 			esc_attr( $key ),
-			$is_on ? ' checked="checked"' : '',
+			checked( $is_on, true, false ),
 			esc_html__( 'Enabled', 'quickgive' )
 		);
 	}
@@ -315,7 +315,7 @@ class QuickGive_Admin {
 				'<label style="margin-right:16px"><input type="radio" name="%1$s[mode]" value="%2$s"%3$s /> %4$s</label>',
 				esc_attr( self::OPTION_NAME ),
 				esc_attr( $value ),
-				( $mode === $value ) ? ' checked="checked"' : '',
+				checked( $mode, $value, false ),
 				esc_html( $label )
 			);
 		}
@@ -339,7 +339,7 @@ class QuickGive_Admin {
 			printf(
 				'<option value="%1$s"%2$s>%3$s</option>',
 				esc_attr( $code ),
-				( $selected === $code ) ? ' selected="selected"' : '',
+				selected( $selected, $code, false ),
 				esc_html( $label )
 			);
 		}
@@ -368,7 +368,7 @@ class QuickGive_Admin {
 
 			<div class="quickgive-shortcode-tip">
 				<span><?php esc_html_e( 'Shortcode:', 'quickgive' ); ?></span>
-				<code>[paystack_donation_popup]</code>
+				<code>[quickgive_donation_popup]</code>
 				<span><?php esc_html_e( '— place anywhere on your site to show the donation button.', 'quickgive' ); ?></span>
 			</div>
 
@@ -393,7 +393,7 @@ class QuickGive_Admin {
 
 		$summary  = QuickGive_Logger::get_summary();
 		$opts     = get_option( self::OPTION_NAME, array() );
-		$currency = $opts['currency'] ?? 'NGN';
+		$currency = sanitize_text_field( $opts['currency'] ?? 'NGN' );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Donation Overview', 'quickgive' ); ?></h1>
